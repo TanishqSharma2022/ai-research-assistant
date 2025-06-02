@@ -27,5 +27,5 @@ def query_papers(prompt, top_k=5):
 
 
 if __name__ == "__main__":
-    query = "state-of-the-art transformer models for named entity recognition"
+    query = "machine translation "
     query_papers(query, top_k=3)
