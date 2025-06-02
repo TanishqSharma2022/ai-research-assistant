@@ -35,9 +35,7 @@ collection = client.get_or_create_collection(name="arxiv-papers")
 for i, paper in enumerate(tqdm(papers, desc="📦 Embedding and Storing")):
     doc_id = f"paper_{i}"
     content = f"{paper['title']} {paper['abstract']}"
-    embedding = model.encode(
-        
-    ).tolist()
+    embedding = model.encode(content).tolist()
     collection.add(
         ids=[doc_id],
         embeddings=[embedding],

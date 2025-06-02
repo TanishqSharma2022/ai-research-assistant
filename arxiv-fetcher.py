@@ -83,6 +83,6 @@ def load_papers_from_csv(filename="arxiv_papers.csv"):
 
 # Example usage
 if __name__ == "__main__":
-    papers = fetch_arxiv_papers(category="cs.CL", max_results=500)
+    papers = fetch_arxiv_papers(category="cs.CL", max_results=2000)
     save_papers_to_csv(papers)
     loaded = load_papers_from_csv()
