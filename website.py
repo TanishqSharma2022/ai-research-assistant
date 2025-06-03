@@ -12,7 +12,7 @@ st.markdown("Ask a question or enter a topic to find relevant papers from arXiv.
 def load_model_and_db():
     model = SentenceTransformer("all-MiniLM-L6-v2")
     client = chromadb.PersistentClient(path="./chroma_db")
-    collection = client.get_collection(name="arxiv-papers")
+    collection = client.get_collection(name="arxiv-papers-v2")
     return model, collection
 
 model, collection = load_model_and_db()
@@ -41,6 +41,6 @@ if submitted and query:
 
         st.markdown(f"#### {i+1}. {metadata['published']} — [{metadata['pdf_url']}]({metadata['pdf_url']})")
         st.write(f"**Title**: {title_abstract.split('.')[0]}")
-        st.write(f"**Authors**: {metadata['authors']}")
+        # st.write(f"**Authors**: {metadata['authors']}")
         st.write(f"**Abstract Snippet**: {title_abstract[:400]}...")
         st.markdown("---")

@@ -1,47 +1,45 @@
+import pandas as pd
 from sentence_transformers import SentenceTransformer
 import chromadb
 from chromadb.config import Settings
 from tqdm import tqdm
-import csv
 
-# Load papers from CSV
-def load_papers_from_csv(filename="arxiv_papers.csv"):
-    papers = []
-    with open(filename, "r", newline='', encoding="utf-8") as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            papers.append({
-                "title": row["title"],
-                "abstract": row["abstract"],
-                "metadata": {
-                    "authors": row["authors"],
-                    "published": row["published"],
-                    "pdf_url": row["pdf_url"]
-                }
-            })
-    return papers
+# 1. Load and clean CSV using Pandas
+def load_and_clean_papers(filename="arxiv_papers_v2.csv"):
+    df = pd.read_csv(filename)
+    df = df.drop_duplicates(subset="id")  # remove duplicates by ID
+    df = df.dropna(subset=["title", "abstract"])  # optional: remove empty rows
+    return df
 
-# 1. Load papers
-papers = load_papers_from_csv()
+# 2. Load the data
+df = load_and_clean_papers()
 
-# 2. Load embedding model
-model = SentenceTransformer("all-MiniLM-L6-v2")  # Fast and decent
+# 3. Initialize embedding model
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# 3. Initialize ChromaDB
+# 4. Initialize ChromaDB
 client = chromadb.PersistentClient(path="./chroma_db")
-collection = client.get_or_create_collection(name="arxiv-papers")
+collection = client.get_or_create_collection(name="arxiv-papers-v2")
 
-# 4. Embed and insert into ChromaDB
-for i, paper in enumerate(tqdm(papers, desc="📦 Embedding and Storing")):
-    doc_id = f"paper_{i}"
-    content = f"{paper['title']} {paper['abstract']}"
+# 5. Embed and insert into ChromaDB
+for i, row in tqdm(df.iterrows(), total=len(df), desc="📦 Embedding and Storing"):
+    doc_id = f"paper_{row['id']}"  # use ArXiv ID directly to avoid overwriting
+    content = f"{row['title']} {row['abstract']}"
     embedding = model.encode(content).tolist()
+    
+    # Metadata
+    metadata = {
+        "id": row["id"],
+        "published": row.get("published", ""),
+        "pdf_url": row.get("pdf_url", "")
+    }
+    
     collection.add(
         ids=[doc_id],
         embeddings=[embedding],
         documents=[content],
-        metadatas=[paper["metadata"]]
+        metadatas=[metadata]
     )
 
 client.heartbeat()
-print("✅ All papers embedded and stored in ChromaDB!")
+print("✅ All unique papers embedded and stored in ChromaDB!")
