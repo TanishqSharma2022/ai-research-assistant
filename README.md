@@ -18,3 +18,14 @@
 - inspecting clusters with umap. some plotly vis as well.
 
 
+
+## To run via command line
+You would need to change the k=5 to get 5 results and the prompt in the file inference.py. then run
+```bash
+python inference.py
+```
+
+## To use the interface website
+```bash
+streamlit run website.py
+```
